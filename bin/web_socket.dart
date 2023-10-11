@@ -2,6 +2,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
+import 'package:args/args.dart';
 
 List<Message> messages = <Message>[];
 List<WebSocketChannel> webSockets = <WebSocketChannel>[];
@@ -35,6 +36,15 @@ String packMessages(List<Message> messages){
 }
 
 void main(List<String> arguments) {
+  var parser = ArgParser();
+  parser.addOption('host', defaultsTo: '192.168.100.73');
+  parser.addOption('port', defaultsTo: '10000');
+  print("Usage:\n ${parser.usage}" );
+  var results = parser.parse(arguments);
+
+  String address = results['host'];
+  int port = int.parse(results['port']);
+
   var handler = webSocketHandler((WebSocketChannel webSocket) {
     webSockets.add(webSocket);
     print("New connection ${webSocket.protocol}");
@@ -54,7 +64,7 @@ void main(List<String> arguments) {
     });
   });
 
-  shelf_io.serve(handler, '192.168.100.73', 10000).then((server) {
+  shelf_io.serve(handler, address, port).then((server) {
     print('Serving at ws://${server.address.host}:${server.port}');
   });
 }
